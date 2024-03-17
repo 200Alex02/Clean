@@ -1,12 +1,10 @@
 package com.feature.presentation.viewModels
 
-
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.feature.domain.use_case.GetPlayersUseCase
 import com.feature.domain.use_case.SendAnalyticsListPlayersUseCase
-import com.feature.presentation.R
+import com.feature.domain.util.Resource
 import com.feature.presentation.ui.PlayersListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +17,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListPlayersViewModel @Inject constructor(
-    context: Context,
     private val getPlayersUseCase: GetPlayersUseCase,
     private val sendAnalyticsListPlayersUseCase: SendAnalyticsListPlayersUseCase
 ) : ViewModel() {
@@ -28,28 +25,36 @@ class ListPlayersViewModel @Inject constructor(
     val state: StateFlow<PlayersListState> = _state
 
     init {
-        getListPlayers(context)
+        getListPlayers()
     }
 
-    fun getListPlayers(context: Context) {
+    fun getListPlayers() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.update { playersListState -> playersListState.copy(isLoading = true) }
 
-            val players = getPlayersUseCase.execute().toMutableList()
+            val result = getPlayersUseCase.execute()
             delay(1000)
-            _state.update { playersListState -> playersListState.copy(players = players) }
-            clearErrorMessage()
 
-            if (players.isEmpty()) {
-                _state.update { playersListState ->
-                    playersListState.copy(
-                        errorMessage = context.resources.getString(
-                            R.string.error_message
+            when (result) {
+                is Resource.Success -> {
+                    _state.update { playersListState ->
+                        playersListState.copy(
+                            players = result.data ?: emptyList(),
+                            isLoading = false
                         )
-                    )
+                    }
+                    clearErrorMessage()
+                }
+
+                is Resource.Error -> {
+                    _state.update { playersListState ->
+                        playersListState.copy(
+                            errorMessage = result.errorMessage.toString(),
+                            isLoading = false
+                        )
+                    }
                 }
             }
-            _state.update { playersListState -> playersListState.copy(isLoading = false) }
         }
     }
 

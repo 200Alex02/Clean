@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,7 +36,6 @@ fun ListPlayersScreen(
 ) {
     val state = viewModel.state.collectAsState()
     var shownPlayersCount by remember { mutableIntStateOf(0) }
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
         viewModel.sendAnalytics(shownPlayersCount)
@@ -70,7 +68,7 @@ fun ListPlayersScreen(
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
                 Text(
-                    text = state.value.errorMessage,
+                    text = stringResource(id = R.string.error_message),
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.displayMedium,
@@ -81,7 +79,7 @@ fun ListPlayersScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
                     onClick = {
-                        viewModel.getListPlayers(context = context)
+                        viewModel.getListPlayers()
                     }
                 ) {
                     Text(

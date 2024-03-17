@@ -23,7 +23,7 @@ internal class RemoteDataSourceImpl @Inject constructor() : RemoteDataSource {
         return if (Random.nextBoolean()) {
             return listPlayers
         } else {
-            emptyList()
+            error("Failed to fetch remote players")
         }
     }
 }
