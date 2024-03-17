@@ -2,11 +2,10 @@ package com.feature.data.repository
 
 import com.feature.data.data_source.local.LocalDataSource
 import com.feature.data.data_source.remote.RemoteDataSource
-import com.feature.data.data_source.remote.listPlayers
 import com.feature.data.mapper.toDomainPlayer
+import com.feature.domain.model.Player
 import com.feature.domain.repository.PlayersRepository
 import javax.inject.Inject
-import kotlin.random.Random
 
 
 internal class GetPlayersRepositoryImpl @Inject constructor(
@@ -14,13 +13,10 @@ internal class GetPlayersRepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource
 ) : PlayersRepository {
 
-    override suspend fun getListPlayers(): List<com.feature.domain.model.Player> {
-        val players = if (Random.nextBoolean()) {
-            localDataSource.getPlayersFromCash()
-        } else {
-            localDataSource.savePlayers(listPlayers)
-            remoteDataSource.getRemotePlayers()
-        }
-        return players.map { it.toDomainPlayer() }
+    override suspend fun getListPlayers(): List<Player> {
+        val remoteData = remoteDataSource.getRemotePlayers()
+        localDataSource.savePlayers(remoteData)
+        val cashData = localDataSource.getPlayersFromCash()
+        return remoteData.ifEmpty { cashData }.map { it.toDomainPlayer() }
     }
 }

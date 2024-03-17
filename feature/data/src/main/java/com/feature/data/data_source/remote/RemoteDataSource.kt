@@ -1,6 +1,7 @@
 package com.feature.data.data_source.remote
 
 import com.feature.data.model.PlayerDto
+import kotlin.random.Random
 
 val listPlayers = listOf(
     PlayerDto(1, "Irog", "Khuev", 22),
@@ -18,6 +19,10 @@ val listPlayers = listOf(
 internal class RemoteDataSource {
 
     fun getRemotePlayers(): List<PlayerDto> {
-        return listPlayers
+        return if (Random.nextBoolean()) {
+            return listPlayers
+        } else {
+            emptyList()
+        }
     }
 }
